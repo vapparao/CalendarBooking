@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CalendarBooking
+namespace CalendarBooking.Data
 {
     public class BookingDBContext
     {

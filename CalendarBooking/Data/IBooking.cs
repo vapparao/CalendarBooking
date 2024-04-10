@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CalendarBooking.Models;
 
-namespace CalendarBooking
+namespace CalendarBooking.Data
 {
     public interface IBooking
     {

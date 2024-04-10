@@ -1,4 +1,5 @@
-﻿using Dapper;
+﻿using CalendarBooking.Models;
+using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -7,7 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CalendarBooking
+namespace CalendarBooking.Data
 {
     public class BookingRepository : IBooking
     {
@@ -31,7 +32,7 @@ namespace CalendarBooking
 
             using var connection = _context.CreateConnection();
             var result = await connection.QueryAsync<int>(sql,
-                                          new { @PeriodStart = model.PeriodStart, @PeriodEnd = model.PeriodEnd, @Status = model.Status });
+                                          new { model.PeriodStart, model.PeriodEnd, model.Status });
             model.Id = result.Single();
             return model;
         }
@@ -42,7 +43,7 @@ namespace CalendarBooking
                             FROM
                                [Booking] WHERE [PeriodStart]=@PeriodStart AND [PeriodEnd]=@PeriodEnd AND ([Status]=@Status OR [Status]=@ReservedStatus)";
             using var connection = _context.CreateConnection();
-            var result = await connection.QueryAsync<int>(sql, new { @PeriodStart = model.PeriodStart, @PeriodEnd = model.PeriodEnd, @Status = model.Status, @ReservedStatus = "Reserved" });
+            var result = await connection.QueryAsync<int>(sql, new { model.PeriodStart, model.PeriodEnd, model.Status, @ReservedStatus = "Reserved" });
             if (result.Count() > 0)
                 return result.Single();
             else

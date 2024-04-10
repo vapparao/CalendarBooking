@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using CalendarBooking.Data;
+using CalendarBooking.Services;
+using CalendarBooking.Services.Utilities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -8,6 +11,10 @@ namespace CalendarBooking
 {
     internal class Program
     {
+        protected Program()
+        {
+        }
+
         private static void Main(string[] args)
         {
             var builder = new ConfigurationBuilder();
@@ -26,12 +33,16 @@ namespace CalendarBooking
                 {
                     services.AddSingleton<BookingDBContext, BookingDBContext>();
                     services.AddTransient<IBooking, BookingRepository>();
+                    services.AddTransient<IDateTimeUtilityService, DateTimeUtilityService>();
                     services.AddTransient<ICalendarBookingService, CalendarBookingService>();
+                    services.AddTransient<IBookingUIService, BookingUIService>();
                 })
                 .UseSerilog()
                 .Build();
-            var repository = ActivatorUtilities.CreateInstance<BookingRepository>(host.Services);
-            var svc = ActivatorUtilities.CreateInstance<CalendarBookingService>(host.Services);
+            ActivatorUtilities.CreateInstance<BookingRepository>(host.Services);
+            ActivatorUtilities.CreateInstance<DateTimeUtilityService>(host.Services);
+            ActivatorUtilities.CreateInstance<CalendarBookingService>(host.Services);
+            var svc = ActivatorUtilities.CreateInstance<BookingUIService>(host.Services);
             svc.Run();
         }
 

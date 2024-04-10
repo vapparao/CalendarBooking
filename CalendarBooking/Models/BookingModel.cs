@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CalendarBooking
+namespace CalendarBooking.Models
 {
     public class BookingModel
     {
