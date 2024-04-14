@@ -3,6 +3,7 @@ namespace CalendarBookingTests
     using CalendarBooking.Models;
     using CalendarBooking.Services;
     using CalendarBooking.Services.Utilities;
+    using Microsoft.Extensions.Configuration;
     using FakeItEasy;
     using Microsoft.Extensions.Logging;
     using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.ObjectModel;
@@ -12,12 +13,14 @@ namespace CalendarBookingTests
     {
         private readonly ICalendarBookingService _bookingService;
         private readonly ILogger<BookingUIService> _log;
+        private readonly IConfiguration _config;
         private readonly IDateTimeUtilityService _dateTimeUtilityService;
 
         public BookingUIServiceTests()
         {
             _bookingService = A.Fake<ICalendarBookingService>();
             _log = A.Fake<ILogger<BookingUIService>>();
+            _config = A.Fake<IConfiguration>();
             _dateTimeUtilityService = new DateTimeUtilityService();
         }
 
@@ -28,12 +31,11 @@ namespace CalendarBookingTests
         {
             // Arrange
             var model = new BookingModel();
-            var sut = new BookingUIService(_log, _bookingService, _dateTimeUtilityService);
-
             A.CallTo(() => _bookingService.GetBooking(A<BookingModel>.Ignored))
              .Returns(-1);
             A.CallTo(() => _bookingService.PeformAdd(A<BookingModel>.Ignored))
              .Returns(model);
+            var sut = new BookingUIService(_log, _config, _bookingService, _dateTimeUtilityService);
             // Act
             sut.Run(input);
             // Assert
@@ -48,12 +50,12 @@ namespace CalendarBookingTests
         {
             // Arrange
             var model = new BookingModel();
-            var sut = new BookingUIService(_log, _bookingService, _dateTimeUtilityService);
 
             A.CallTo(() => _bookingService.GetBooking(A<BookingModel>.Ignored))
              .Returns(1);
             A.CallTo(() => _bookingService.PeformAdd(A<BookingModel>.Ignored))
              .Returns(model);
+            var sut = new BookingUIService(_log, _config, _bookingService, _dateTimeUtilityService);
             // Act
             sut.Run(input);
             // Assert
@@ -68,12 +70,12 @@ namespace CalendarBookingTests
         {
             // Arrange
             var model = new BookingModel();
-            var sut = new BookingUIService(_log, _bookingService, _dateTimeUtilityService);
 
             A.CallTo(() => _bookingService.GetBooking(A<BookingModel>.Ignored))
              .Returns(1);
             A.CallTo(() => _bookingService.PeformAdd(A<BookingModel>.Ignored))
              .Returns(model);
+            var sut = new BookingUIService(_log, _config, _bookingService, _dateTimeUtilityService);
             // Act
             sut.Run(input);
             // Assert
@@ -88,12 +90,12 @@ namespace CalendarBookingTests
         {
             // Arrange
             var model = new BookingModel();
-            var sut = new BookingUIService(_log, _bookingService, _dateTimeUtilityService);
 
             A.CallTo(() => _bookingService.GetBooking(A<BookingModel>.Ignored))
              .Returns(1);
             A.CallTo(() => _bookingService.PeformAdd(A<BookingModel>.Ignored))
              .Returns(model);
+            var sut = new BookingUIService(_log, _config, _bookingService, _dateTimeUtilityService);
             // Act
             sut.Run(input);
             // Assert
@@ -108,12 +110,12 @@ namespace CalendarBookingTests
         {
             // Arrange
             var model = new BookingModel();
-            var sut = new BookingUIService(_log, _bookingService, _dateTimeUtilityService);
 
             A.CallTo(() => _bookingService.GetBooking(A<BookingModel>.Ignored))
              .Returns(-1);
             A.CallTo(() => _bookingService.PeformDelete(A<BookingModel>.Ignored))
              .Returns(model);
+            var sut = new BookingUIService(_log, _config, _bookingService, _dateTimeUtilityService);
             // Act
             sut.Run(input);
             // Assert
@@ -128,12 +130,12 @@ namespace CalendarBookingTests
         {
             // Arrange
             var model = new BookingModel();
-            var sut = new BookingUIService(_log, _bookingService, _dateTimeUtilityService);
 
             A.CallTo(() => _bookingService.GetBooking(A<BookingModel>.Ignored))
              .Returns(1);
             A.CallTo(() => _bookingService.PeformDelete(A<BookingModel>.Ignored))
              .Returns(model);
+            var sut = new BookingUIService(_log, _config, _bookingService, _dateTimeUtilityService);
             // Act
             sut.Run(input);
             // Assert
@@ -148,12 +150,12 @@ namespace CalendarBookingTests
         {
             // Arrange
             var model = new BookingModel();
-            var sut = new BookingUIService(_log, _bookingService, _dateTimeUtilityService);
 
             A.CallTo(() => _bookingService.GetBooking(A<BookingModel>.Ignored))
              .Returns(1);
             A.CallTo(() => _bookingService.PeformDelete(A<BookingModel>.Ignored))
              .Returns(model);
+            var sut = new BookingUIService(_log, _config, _bookingService, _dateTimeUtilityService);
             // Act
             sut.Run(input);
             // Assert

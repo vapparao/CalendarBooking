@@ -1,4 +1,5 @@
-﻿using NodaTime;
+﻿using CalendarBooking.Models;
+using NodaTime;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -10,13 +11,34 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CalendarBooking.Services.Utilities
 {
+    /// <summary>
+    /// DateTimeUtilityService - Helper class for date related logic implementation
+    /// </summary>
     public class DateTimeUtilityService : IDateTimeUtilityService
     {
+        private const string DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
+        private const string DAY_FORMAT = "dd";
+        private const string MONTH_FORMAT = "MM";
+        private const string YEAR_FORMAT = "yyyy";
+        private const string DEFAULT_SECONDS = "00";
+        private const string FIRST_DAY = "01";
+        private const string BOOKING_DAY_START_TIME = "09:00:00";
+        private const string BOOKING_DAY_END_TIME = "17:00:00";
+
+        /// <summary>
+        /// Determinse if the povided date IsSecondDayOfThirdWeek
+        /// </summary>
+        /// <param name="date"></param>
+        /// <param name="month"></param>
+        /// <param name="year"></param>
+        /// <param name="hours"></param>
+        /// <param name="minutes"></param>
+        /// <returns></returns>
         public bool IsSecondDayOfThirdWeek(string date, string month, string year, string hours, string minutes)
         {
             var result = false;
-            DateTime inputDate = DateTime.ParseExact($"{date}/{month}/{year} {hours}:{minutes}:00", "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-            DateTime inputFirstDate = DateTime.ParseExact($"01/{month}/{year} {hours}:{minutes}:00", "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+            DateTime inputDate = DateTime.ParseExact($"{date}/{month}/{year} {hours}:{minutes}:{DEFAULT_SECONDS}", DATE_FORMAT, CultureInfo.InvariantCulture);
+            DateTime inputFirstDate = DateTime.ParseExact($"{FIRST_DAY}/{month}/{year} {hours}:{minutes}:{DEFAULT_SECONDS}", DATE_FORMAT, CultureInfo.InvariantCulture);
             var firstMondayDateOfMonth = LocalDate.FromYearMonthWeekAndDay(inputDate.Year, inputDate.Month, 1, IsoDayOfWeek.Monday);
             var previousModayDate = firstMondayDateOfMonth.PlusDays(-7);
             if (previousModayDate.Month != firstMondayDateOfMonth.Month)
@@ -41,11 +63,17 @@ namespace CalendarBooking.Services.Utilities
             return result;
         }
 
+        /// <summary>
+        /// Determinse if the povided time IsTimeWithInDayAppointmentsWindow
+        /// </summary>
+        /// <param name="periodStart"></param>
+        /// <param name="periodEnd"></param>
+        /// <returns></returns>
         public bool IsTimeWithInDayAppointmentsWindow(DateTime periodStart, DateTime periodEnd)
         {
             var result = false;
-            DateTime dayBookingStart = DateTime.ParseExact($"{periodStart.ToString("dd")}/{periodStart.ToString("MM")}/{periodStart.ToString("yyyy")} 09:00:00", "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-            DateTime dayBookingEnd = DateTime.ParseExact($"{periodStart.ToString("dd")}/{periodStart.ToString("MM")}/{periodStart.ToString("yyyy")} 17:00:00", "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+            DateTime dayBookingStart = DateTime.ParseExact($"{periodStart.ToString(DAY_FORMAT)}/{periodStart.ToString(MONTH_FORMAT)}/{periodStart.ToString(YEAR_FORMAT)} {BOOKING_DAY_START_TIME}", DATE_FORMAT, CultureInfo.InvariantCulture);
+            DateTime dayBookingEnd = DateTime.ParseExact($"{periodStart.ToString(DAY_FORMAT)}/{periodStart.ToString(MONTH_FORMAT)}/{periodStart.ToString(YEAR_FORMAT)} {BOOKING_DAY_END_TIME}", DATE_FORMAT, CultureInfo.InvariantCulture);
             if ((periodStart >= dayBookingStart && periodStart <= dayBookingEnd) && (periodEnd >= dayBookingStart && periodEnd <= dayBookingEnd))
             {
                 result = true;

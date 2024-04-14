@@ -9,12 +9,25 @@ using System.Runtime.InteropServices;
 
 namespace CalendarBooking
 {
+    /// <summary>
+    /// Entry class - Manages host configuration
+    /// </summary>
     internal class Program
     {
         protected Program()
         {
         }
 
+        private const string ENV_PRODUCTION = "production";
+        private const string ASPNETCORE_ENVIRONMENT = "ASPNETCORE_ENVIRONMENT";
+        private const string CONFIG_FILE_NAME = "appsettings.json";
+        private const string CONFIG_FILE_PREFIX = "appsettings";
+        private const string CONFIG_FILE_EXT = ".json";
+
+        /// <summary>
+        /// Entry method - Initializes host configurations
+        /// </summary>
+        /// <param name="args"></param>
         private static void Main(string[] args)
         {
             var builder = new ConfigurationBuilder();
@@ -46,11 +59,15 @@ namespace CalendarBooking
             svc.Run();
         }
 
+        /// <summary>
+        /// Bulid Configuration
+        /// </summary>
+        /// <param name="builder"></param>
         private static void BuildConfig(IConfigurationBuilder builder)
         {
             builder.SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "production"}.json", optional: true)
+                .AddJsonFile(CONFIG_FILE_NAME, optional: false, reloadOnChange: true)
+                .AddJsonFile($"{CONFIG_FILE_PREFIX}.{Environment.GetEnvironmentVariable(ASPNETCORE_ENVIRONMENT) ?? ENV_PRODUCTION}{CONFIG_FILE_EXT}", optional: true)
                 .AddEnvironmentVariables();
         }
     }

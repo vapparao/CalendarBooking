@@ -1,31 +1,97 @@
-﻿using CalendarBooking.Models;
+﻿using Azure;
+using CalendarBooking.Models;
 using CalendarBooking.Services.Utilities;
+using DbUp;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NodaTime;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace CalendarBooking.Services
 {
+    /// <summary>
+    /// BookingUIService
+    ///  - Accepts user input
+    ///  - Parses user input
+    ///  - Initiates database creation
+    ///  - Processes commands
+    ///  - Responds appropriately to respective commands
+    /// </summary>
     public class BookingUIService : IBookingUIService
     {
         private readonly ILogger<BookingUIService> _log;
+        private readonly IConfiguration _config;
         private readonly ICalendarBookingService _bookingService;
         private readonly IDateTimeUtilityService _dateTimeUtilityService;
+        private const string EMPTY = "";
+        private const string CONNECTION_STRING = "DefaultConnection";
+        private const string SUCCESS_MSG = "Success!";
+        private const string DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
+        private const string DAY_FORMAT = "dd";
+        private const string MONTH_FORMAT = "MM";
+        private const string YEAR_FORMAT = "yyyy";
+        private const string DEFAULT_SECONDS = "00";
+        private const string SPACE_STRING = " ";
+        private const string SLASH_STRING = "/";
+        private const string COLON_STRING = ":";
+        private const string COMMAND_ADD = "ADD";
+        private const string COMMAND_KEEP = "KEEP";
+        private const string COMMAND_DELETE = "DELETE";
+        private const string COMMAND_FIND = "FIND";
+        private const string ADDED = "Added";
+        private const string RESERVED = "Reserved";
 
-        public BookingUIService(ILogger<BookingUIService> log, ICalendarBookingService bookingService, IDateTimeUtilityService dateTimeUtilityService)
+        /// <summary>
+        /// Constructor - Initializes BookingUIService
+        /// </summary>
+        /// <param name="log"></param>
+        /// <param name="config"></param>
+        /// <param name="bookingService"></param>
+        /// <param name="dateTimeUtilityService"></param>
+        public BookingUIService(ILogger<BookingUIService> log, IConfiguration config, ICalendarBookingService bookingService, IDateTimeUtilityService dateTimeUtilityService)
         {
             _log = log;
+            _config = config;
             _bookingService = bookingService;
             _dateTimeUtilityService = dateTimeUtilityService;
         }
 
-        public void Run(string optionalInput = "")
+        /// <summary>
+        /// Entry method - Processes user commands
+        /// </summary>
+        /// <param name="optionalInput"></param>
+        public void Run(string optionalInput = EMPTY)
         {
+            if (optionalInput.Length == 0)
+            {
+                // Database initialization
+                var connectionString = _config.GetConnectionString(CONNECTION_STRING);
+                var upgrader =
+                DeployChanges.To
+                    .SqlDatabase(connectionString)
+                    .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
+                    .LogToConsole()
+                    .Build();
+                var dbResult = upgrader.PerformUpgrade();
+
+                if (!dbResult.Successful)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(dbResult.Error);
+                    Console.ResetColor();
+                }
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine(SUCCESS_MSG);
+                Console.ResetColor();
+            }
+
             //User Input Helper Statements
 
             _log.LogInformation("Running {cbService}", "CalendarBookingService");
@@ -39,32 +105,32 @@ namespace CalendarBooking.Services
 
             //User Input read and processing
 
-            string inputString = optionalInput.Length > 0 ? optionalInput : Console.ReadLine() ?? "";
+            string inputString = optionalInput.Length > 0 ? optionalInput : Console.ReadLine() ?? EMPTY;
 
             _log.LogInformation("Provided Input {input}", inputString);
 
             var command = inputString?.Split(" ")[0];
-            string dd = $"{DateTime.Now.ToString("dd")}", mon = $"{DateTime.Now.ToString("MM")}", yyyy = $"{DateTime.Now.ToString("yyyy")}", hh = "00", mm = "00";
-            if (command == "ADD")
+            string dd = $"{DateTime.Now.ToString(DAY_FORMAT)}", mon = $"{DateTime.Now.ToString(MONTH_FORMAT)}", yyyy = $"{DateTime.Now.ToString(YEAR_FORMAT)}", hh = DEFAULT_SECONDS, mm = DEFAULT_SECONDS;
+            if (command == COMMAND_ADD)
             {
                 try
                 {
                     // ADD command input processing
                     if (inputString is not null)
                     {
-                        dd = inputString.Split(" ")[1].Split("/")[0];
-                        mon = inputString.Split(" ")[1].Split("/")[1];
-                        hh = inputString.Split(" ")[2].Split(":")[0];
-                        mm = inputString.Split(" ")[2].Split(":")[1];
+                        dd = inputString.Split(SPACE_STRING)[1].Split(SLASH_STRING)[0];
+                        mon = inputString.Split(SPACE_STRING)[1].Split(SLASH_STRING)[1];
+                        hh = inputString.Split(SPACE_STRING)[2].Split(COLON_STRING)[0];
+                        mm = inputString.Split(SPACE_STRING)[2].Split(COLON_STRING)[1];
                     }
-                    DateTime inputDate = DateTime.ParseExact($"{dd}/{mon}/{yyyy} {hh}:{mm}:00", "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                    DateTime inputDate = DateTime.ParseExact($"{dd}/{mon}/{yyyy} {hh}:{mm}:{DEFAULT_SECONDS}", DATE_FORMAT, CultureInfo.InvariantCulture);
                     Instant start = Instant.FromDateTimeUtc(DateTime.SpecifyKind(inputDate, DateTimeKind.Utc));
                     Instant end = start.Plus(Duration.FromMinutes(30));
                     start.InZone(tz);
                     end.InZone(tz);
                     model.PeriodStart = start.ToDateTimeUtc();
                     model.PeriodEnd = end.ToDateTimeUtc();
-                    model.Status = "Added";
+                    model.Status = ADDED;
 
                     _log.LogInformation("Add Booking Requested");
 
@@ -100,26 +166,26 @@ namespace CalendarBooking.Services
                     _log.LogInformation("Response: Invalid Input - Please enter valid data for {command} command", command);
                 }
             }
-            else if (command == "DELETE")
+            else if (command == COMMAND_DELETE)
             {
                 try
                 {
                     // DELETE command input processing
                     if (inputString is not null)
                     {
-                        dd = inputString.Split(" ")[1].Split("/")[0];
-                        mon = inputString.Split(" ")[1].Split("/")[1];
-                        hh = inputString.Split(" ")[2].Split(":")[0];
-                        mm = inputString.Split(" ")[2].Split(":")[1];
+                        dd = inputString.Split(SPACE_STRING)[1].Split(SLASH_STRING)[0];
+                        mon = inputString.Split(SPACE_STRING)[1].Split(SLASH_STRING)[1];
+                        hh = inputString.Split(SPACE_STRING)[2].Split(COLON_STRING)[0];
+                        mm = inputString.Split(SPACE_STRING)[2].Split(COLON_STRING)[1];
                     }
-                    DateTime inputDate = DateTime.ParseExact($"{dd}/{mon}/{yyyy} {hh}:{mm}:00", "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                    DateTime inputDate = DateTime.ParseExact($"{dd}/{mon}/{yyyy} {hh}:{mm}:{DEFAULT_SECONDS}", DATE_FORMAT, CultureInfo.InvariantCulture);
                     Instant start = Instant.FromDateTimeUtc(DateTime.SpecifyKind(inputDate, DateTimeKind.Utc));
                     Instant end = start.Plus(Duration.FromMinutes(30));
                     start.InZone(tz);
                     end.InZone(tz);
                     model.PeriodStart = start.ToDateTimeUtc();
                     model.PeriodEnd = end.ToDateTimeUtc();
-                    model.Status = "Added";
+                    model.Status = ADDED;
                     _log.LogInformation("Delete Booking Requested");
 
                     // Perform Delete
@@ -133,6 +199,7 @@ namespace CalendarBooking.Services
                         var getResult = _bookingService.GetBooking(model).GetAwaiter().GetResult();
                         if (getResult > 0)
                         {
+                            model.Id = getResult;
                             var result = _bookingService.PeformDelete(model).GetAwaiter().GetResult();
                             _log.LogInformation("Response: Booking for {periodStart} - {periodEnd}  successfully deleted", result.PeriodStart, result.PeriodEnd);
                         }
@@ -147,24 +214,24 @@ namespace CalendarBooking.Services
                     _log.LogInformation("Response: Invalid Input - Please enter valid data for {command} command", command);
                 }
             }
-            else if (command == "KEEP")
+            else if (command == COMMAND_KEEP)
             {
                 try
                 {
                     // KEEP command input processing
                     if (inputString is not null)
                     {
-                        hh = inputString.Split(" ")[1].Split(":")[0];
-                        mm = inputString.Split(" ")[1].Split(":")[1];
+                        hh = inputString.Split(SPACE_STRING)[1].Split(COLON_STRING)[0];
+                        mm = inputString.Split(SPACE_STRING)[1].Split(COLON_STRING)[1];
                     }
-                    DateTime inputDate = DateTime.ParseExact($"{dd}/{mon}/{yyyy} {hh}:{mm}:00", "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                    DateTime inputDate = DateTime.ParseExact($"{dd}/{mon}/{yyyy} {hh}:{mm}:{DEFAULT_SECONDS}", DATE_FORMAT, CultureInfo.InvariantCulture);
                     Instant start = Instant.FromDateTimeUtc(DateTime.SpecifyKind(inputDate, DateTimeKind.Utc));
                     Instant end = start.Plus(Duration.FromMinutes(30));
                     start.InZone(tz);
                     end.InZone(tz);
                     model.PeriodStart = start.ToDateTimeUtc();
                     model.PeriodEnd = end.ToDateTimeUtc();
-                    model.Status = "Added";
+                    model.Status = ADDED;
                     _log.LogInformation("Reserve Booking Requested");
 
                     // Perform Reserve
@@ -184,7 +251,7 @@ namespace CalendarBooking.Services
                         {
                             if (_dateTimeUtilityService.IsTimeWithInDayAppointmentsWindow(model.PeriodStart, model.PeriodEnd))
                             {
-                                model.Status = "Reserved";
+                                model.Status = RESERVED;
                                 var result = _bookingService.PeformReserve(model).GetAwaiter().GetResult();
                                 _log.LogInformation("Response: Booking for {periodStart} - {periodEnd}  {status}", result.PeriodStart, result.PeriodEnd, result.Status);
                             }
@@ -200,24 +267,24 @@ namespace CalendarBooking.Services
                     _log.LogInformation("Response: Invalid Input - Please enter valid data for {command} command", command);
                 }
             }
-            else if (command == "FIND")
+            else if (command == COMMAND_FIND)
             {
                 try
                 {
                     // FIND command input processing
                     if (inputString is not null)
                     {
-                        dd = inputString.Split(" ")[1].Split("/")[0];
-                        mon = inputString.Split(" ")[1].Split("/")[1];
+                        dd = inputString.Split(SPACE_STRING)[1].Split(SLASH_STRING)[0];
+                        mon = inputString.Split(SPACE_STRING)[1].Split(SLASH_STRING)[1];
                     }
-                    DateTime inputDate = DateTime.ParseExact($"{dd}/{mon}/{yyyy} {hh}:{mm}:00", "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                    DateTime inputDate = DateTime.ParseExact($"{dd}/{mon}/{yyyy} {hh}:{mm}:{DEFAULT_SECONDS}", DATE_FORMAT, CultureInfo.InvariantCulture);
                     Instant start = Instant.FromDateTimeUtc(DateTime.SpecifyKind(inputDate, DateTimeKind.Utc));
                     Instant end = start.Plus(Duration.FromMinutes(30));
                     start.InZone(tz);
                     end.InZone(tz);
                     model.PeriodStart = start.ToDateTimeUtc();
                     model.PeriodEnd = end.ToDateTimeUtc();
-                    model.Status = "Added";
+                    model.Status = ADDED;
                     _log.LogInformation("Find Booking Slots Requested");
                     var result = _bookingService.PerformFind(model).GetAwaiter().GetResult();
                     if (result.Count() > 0)

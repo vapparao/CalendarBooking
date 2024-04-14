@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalendarBooking", "CalendarBooking\CalendarBooking.csproj", "{3C0CFA32-8557-421C-B42C-7901B4B24B99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CalendarBooking", "CalendarBooking\CalendarBooking.csproj", "{3C0CFA32-8557-421C-B42C-7901B4B24B99}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalendarBookingTests", "CalendarBookingTests\CalendarBookingTests.csproj", "{6DF28A21-F7FF-4208-A390-C0F818D81E95}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CalendarBookingTests", "CalendarBookingTests\CalendarBookingTests.csproj", "{6DF28A21-F7FF-4208-A390-C0F818D81E95}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

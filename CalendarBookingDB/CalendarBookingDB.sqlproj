@@ -6,7 +6,7 @@
     <Name>CalendarBookingDB</Name>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
-    <ProjectGuid>{44b3d5e2-ec67-4043-9b0f-e6b7a662d940}</ProjectGuid>
+    <ProjectGuid>{610ebd95-d6f7-4323-ab13-463c33dc3b4b}</ProjectGuid>
     <DSP>Microsoft.Data.Tools.Schema.Sql.Sql160DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>

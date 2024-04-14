@@ -8,6 +8,8 @@ namespace CalendarBooking.Services
 {
     public interface IBookingUIService
     {
-        void Run(string optionalInput = "");
+        private const string EMPTY = "";
+
+        void Run(string optionalInput = EMPTY);
     }
 }

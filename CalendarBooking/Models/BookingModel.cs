@@ -8,9 +8,16 @@ namespace CalendarBooking.Models
 {
     public class BookingModel
     {
-        public int Id { get; set; }
+        private const string NAME = "Venkat Penuganti";
+        private static readonly DateTime TODAY = DateTime.Now;
+
+        public long Id { get; set; }
         public DateTime PeriodStart { get; set; }
         public DateTime PeriodEnd { get; set; }
         public string? Status { get; set; }
+        public string? CreatedBy { get; set; } = NAME;
+        public DateTime CreatedDate { get; set; } = TODAY;
+        public string? ModifiedBy { get; set; } = NAME;
+        public DateTime ModifiedDate { get; set; } = TODAY;
     }
 }
