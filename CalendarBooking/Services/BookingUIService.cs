@@ -47,6 +47,8 @@ namespace CalendarBooking.Services
         private const string COMMAND_FIND = "FIND";
         private const string ADDED = "Added";
         private const string RESERVED = "Reserved";
+        private const string BOOKING_DAY_START_TIME = "09:00:00";
+        private const string BOOKING_DAY_START_END = "09:30:00";
 
         /// <summary>
         /// Constructor - Initializes BookingUIService
@@ -276,6 +278,8 @@ namespace CalendarBooking.Services
                     {
                         dd = inputString.Split(SPACE_STRING)[1].Split(SLASH_STRING)[0];
                         mon = inputString.Split(SPACE_STRING)[1].Split(SLASH_STRING)[1];
+                        hh = "09";
+                        mm = "00";
                     }
                     DateTime inputDate = DateTime.ParseExact($"{dd}/{mon}/{yyyy} {hh}:{mm}:{DEFAULT_SECONDS}", DATE_FORMAT, CultureInfo.InvariantCulture);
                     Instant start = Instant.FromDateTimeUtc(DateTime.SpecifyKind(inputDate, DateTimeKind.Utc));
@@ -289,7 +293,15 @@ namespace CalendarBooking.Services
                     var result = _bookingService.PerformFind(model).GetAwaiter().GetResult();
                     if (result.Count() > 0)
                     {
-                        _log.LogInformation("Response: No Bookings available for {periodStart} - {periodEnd}", model.PeriodStart, model.PeriodEnd);
+                        var findResult = _dateTimeUtilityService.FindFreeBooking(model.PeriodStart, model.PeriodEnd, result);
+                        if (findResult.IsBooked)
+                        {
+                            _log.LogInformation("Response: No Bookings available for {periodStart} - {periodEnd}", model.PeriodStart, model.PeriodEnd);
+                        }
+                        else
+                        {
+                            _log.LogInformation("Response: Booking slot available for {periodStart}  -  {periodEnd}", findResult.PeriodStart, findResult.PeriodEnd);
+                        }
                     }
                     else
                     {

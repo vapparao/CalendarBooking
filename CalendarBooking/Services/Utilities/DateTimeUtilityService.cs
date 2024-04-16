@@ -1,6 +1,7 @@
 ﻿using CalendarBooking.Models;
 using NodaTime;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -24,6 +25,49 @@ namespace CalendarBooking.Services.Utilities
         private const string FIRST_DAY = "01";
         private const string BOOKING_DAY_START_TIME = "09:00:00";
         private const string BOOKING_DAY_END_TIME = "17:00:00";
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="periodStart"></param>
+        /// <param name="periodEnd"></param>
+        /// <param name="bookings"></param>
+        /// <returns></returns>
+        public FindViewModel FindFreeBooking(DateTime periodStart, DateTime periodEnd, IEnumerable<BookingModel> bookings)
+        {
+            var result = new FindViewModel();
+            result.IsBooked = true;
+            Instant start = Instant.FromDateTimeUtc(DateTime.SpecifyKind(periodStart, DateTimeKind.Utc));
+            Instant end = Instant.FromDateTimeUtc(DateTime.SpecifyKind(periodEnd, DateTimeKind.Utc));
+
+            Interval interval = new Interval(start, end);
+            foreach (BookingModel booking in bookings)
+            {
+                Instant target = Instant.FromDateTimeUtc(DateTime.SpecifyKind(booking.PeriodStart, DateTimeKind.Utc));
+                if (interval.Contains(target))
+                {
+                    periodStart = periodEnd;
+                    periodEnd = periodStart.AddMinutes(30);
+                    if (periodEnd.ToString("hh:mm:ss") == BOOKING_DAY_END_TIME)
+                    {
+                        return result;
+                    }
+                    else
+                    {
+                        return FindFreeBooking(periodStart, periodEnd, bookings);
+                    }
+                }
+                else
+                {
+                    result.PeriodStart = periodStart;
+                    result.PeriodEnd = periodEnd;
+                    result.IsBooked = false;
+                    break;
+                }
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Determinse if the povided date IsSecondDayOfThirdWeek
