@@ -18,7 +18,7 @@ Run the CalenderBooking Project and it will open the console window that has ins
 - ![Invalid Input](CalendarBooking/CalendarBooking/Docs/Images/../../../Docs/Images/InvalidInput.jpg)
 - ![Add Success](CalendarBooking/CalendarBooking/Docs/Images/../../../Docs/Images/AddSuccess.jpg)
 - ![Delete Success](CalendarBooking/CalendarBooking/Docs/Images/../../../Docs/Images/DeleteSuccess.jpg)
-- ![Delete Error](CalendarBooking/CalendarBooking/Docs/Images/../../../Docs/Images/InvalidInput.jpgDeleteError.jpg)
+- ![Delete Error](CalendarBooking/CalendarBooking/Docs/Images/../../../Docs/Images/DeleteError.jpg)
 - ![Outside Booking Window](CalendarBooking/CalendarBooking/Docs/Images/../../../Docs/Images/OutSideError.jpg)
 - ![Third Week 2 Day Booking Error](CalendarBooking/CalendarBooking/Docs/Images/../../../Docs/Images/ThirdWkSDay.jpg)
 - ![Find Success](CalendarBooking/CalendarBooking/Docs/Images/../../../Docs/Images/FindSuccess.jpg)
